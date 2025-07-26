@@ -97,7 +97,7 @@ def process(vals, writer):
         popped = existing_list.lpop(1)
         if popped:
             KV_CACHE[key] = existing_list
-            writer.write(resp_format_data(popped, "bulkstr"))
+            writer.write(resp_format_data([key, popped], "array"))
             return
 
         id = existing_list.stand_in_queue()
