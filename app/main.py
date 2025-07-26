@@ -3,20 +3,29 @@ import socket  # noqa: F401
 import sys
 from datetime import datetime, timedelta
 from shutil import Error
+from tokenize import endpats
 
 KV_CACHE = {}
 
-def resp_format_data(val, datatype) -> bytes :
+def resp_format_data_raw(val, datatype) -> str :
     if datatype == 'int':
-        return f":{val}\r\n".encode()
+        return f":{val}\r\n"
     elif datatype == "simplestr":
-        return f"+{val}\r\n".encode()
+        return f"+{val}\r\n"
     elif datatype == 'bulkstr':
         if val is None:
-            return "$-1\r\n".encode()
-        return f"${len(val)}\r\n{val}\r\n".encode()
+            return "$-1\r\n"
+        return f"${len(val)}\r\n{val}\r\n"
+    elif datatype == 'array':
+        res = f"*{len(val)}\r\n"
+        for v in val:
+            res += resp_format_data_raw(v, "bulkstr")
+        return res
     else:
         raise Error(f"Unsupported datatype: {datatype}")
+
+def resp_format_data(val, datatype) -> bytes:
+    return resp_format_data_raw(val, datatype).encode()
 
 def parse_raw_data(raw_data: bytes):
     if not raw_data:
@@ -112,6 +121,24 @@ def process(vals, writer):
         KV_CACHE[key] = existing_list
         writer.write(resp_format_data(len(existing_list), "int"))
 
+    #LRANGE <key> <start_idx> <end_idx>
+    elif _command=="LRANGE":
+        key = vals[1]
+        start_idx = int(vals[2])
+        end_idx = int(vals[3])
+
+        values = KV_CACHE.get(key, [])
+        if values == []:
+            retval = []
+        elif start_idx >= len(values):
+            retval = []
+        elif start_idx > end_idx:
+            retval = []
+        else:
+            if end_idx >= len(values):
+                end_idx = len(values)-1
+            retval = values[start_idx:end_idx+1]
+        writer.write(resp_format_data(retval, "array"))
 
     else:
         writer.write(resp_format_data(f"Invalid command: {_command}", "bulkstr"))
@@ -129,7 +156,7 @@ async def handle_client(reader, writer):
             await writer.wait_closed()
             return
         else:
-            # print("vals: ", vals)
+            print("vals: ", vals)
             process(vals, writer)
 
 
