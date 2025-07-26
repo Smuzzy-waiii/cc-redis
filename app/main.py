@@ -147,15 +147,28 @@ def process(vals, writer):
     # LLEN <LIST_KEY> => popped elem
     elif _command == "LPOP":
         key = vals[1]
+        amt_to_pop = 1
+
+        if len(vals) > 2:
+            amt_to_pop = int(vals[2])
+
         existing_list = KV_CACHE.get(key, [])
         if existing_list==[]:
             writer.write(resp_format_data(None, "bulkstr"))
-        retval = existing_list.pop(0)
-        KV_CACHE[key] = existing_list
-        writer.write(resp_format_data(retval, "bulkstr"))
+
+        if amt_to_pop > len(existing_list):
+            amt_to_pop = len(existing_list)
+
+        retval = existing_list[:amt_to_pop] if amt_to_pop > 1 else existing_list[0]
+        KV_CACHE[key] = existing_list[amt_to_pop:]
+        writer.write(resp_format_data(retval, "array" if amt_to_pop > 1 else "bulkstr"))
 
     #LRANGE <key> <start_idx> <end_idx>
     elif _command=="LRANGE":
+        if len(vals) < 4:
+            writer.write(resp_format_data("format: LRANGE <key> <start_idx> <end_idx>", "bulkstr"))
+            return
+
         key = vals[1]
         start_idx = int(vals[2])
         end_idx = int(vals[3])
