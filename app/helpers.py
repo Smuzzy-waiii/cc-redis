@@ -1,4 +1,4 @@
-from app.main import DEV_MODE
+DEV_MODE = False
 
 def devprint(*args):
     if DEV_MODE:

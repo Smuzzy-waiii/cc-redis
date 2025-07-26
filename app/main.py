@@ -2,12 +2,9 @@ import asyncio
 import os
 import socket  # noqa: F401
 
-from app.helpers import resp_format_data, devprint
+from app.helpers import devprint, DEV_MODE
 from app.parse import parse_raw_data
 from app.process import process
-
-DEV_MODE = False
-NEW_LIST_OBJ = {"value": [], "type": "array", "blocking_queue": []}
 
 async def handle_client(reader, writer):
     devprint("Client connected")
