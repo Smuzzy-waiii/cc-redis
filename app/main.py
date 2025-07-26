@@ -1,10 +1,19 @@
 import asyncio
 import socket  # noqa: F401
 import sys
-from sys import prefix
+from shutil import Error
 
+def resp_format_data(val, datatype) -> bytes :
+    if datatype == 'int':
+        return f":{val}\r\n".encode()
+    elif datatype == "simplestr":
+        return f"+{val}\r\n".encode()
+    elif datatype == 'bulkstr':
+        return f"${len(val)}\r\n{val}\r\n".encode()
+    else:
+        raise Error(f"Unsupported datatype: {datatype}")
 
-def process_raw_data(raw_data: bytes):
+def parse_raw_data(raw_data: bytes):
     if not raw_data:
         return None, None
 
@@ -17,8 +26,9 @@ def process_raw_data(raw_data: bytes):
     count = int(prefix[1])
 
     vals = []
-    idx = 1
+    idx = 0
     for i in range(count):
+        idx+=1
         next_elem = data_arr[idx]
 
         control_char = next_elem[0]
@@ -37,12 +47,20 @@ def process_raw_data(raw_data: bytes):
             vals.append(val)
     return vals, count
 
+def process(vals, writer):
+    _command = vals[0]
+    if _command=="PING":
+        writer.write(resp_format_data( "PONG", "simplestr"))
+    elif _command=="ECHO":
+        resp = resp_format_data(vals[1], "bulkstr")
+        writer.write(resp)
+
 async def handle_client(reader, writer):
     print("Client connected")
 
     while True:
         raw_data = await reader.read(1024)
-        vals, count = process_raw_data(raw_data)
+        vals, count = parse_raw_data(raw_data)
 
         if vals is None:
             await writer.drain()
@@ -51,9 +69,8 @@ async def handle_client(reader, writer):
             return
         else:
             print("vals: ", vals)
-            for val in vals:
-                if val == "PING":
-                    writer.write(b"+PONG\r\n")
+            process(vals, writer)
+
 
 async def main():
     # You can use print statements as follows for debugging, they'll be visible when running tests.
