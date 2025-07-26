@@ -3,12 +3,16 @@ import socket  # noqa: F401
 import sys
 from shutil import Error
 
+KV_CACHE = {}
+
 def resp_format_data(val, datatype) -> bytes :
     if datatype == 'int':
         return f":{val}\r\n".encode()
     elif datatype == "simplestr":
         return f"+{val}\r\n".encode()
     elif datatype == 'bulkstr':
+        if val is None:
+            return "$-1\r\n".encode()
         return f"${len(val)}\r\n{val}\r\n".encode()
     else:
         raise Error(f"Unsupported datatype: {datatype}")
@@ -54,6 +58,15 @@ def process(vals, writer):
     elif _command=="ECHO":
         resp = resp_format_data(vals[1], "bulkstr")
         writer.write(resp)
+    elif _command=="SET":
+        key = vals[1]
+        value = vals[2]
+        KV_CACHE[key] = value
+        writer.write(resp_format_data("OK", "simplestr"))
+    elif _command=="GET":
+        key = vals[1]
+        value = KV_CACHE.get(key)
+        writer.write(resp_format_data(value, "bulkstr"))
 
 async def handle_client(reader, writer):
     print("Client connected")
