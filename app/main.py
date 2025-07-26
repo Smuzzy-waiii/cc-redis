@@ -1,7 +1,10 @@
 import asyncio
 import socket  # noqa: F401
 import sys
+from datetime import datetime, timedelta
 from shutil import Error
+
+from future.backports.datetime import datetime
 
 KV_CACHE = {}
 
@@ -52,21 +55,54 @@ def parse_raw_data(raw_data: bytes):
     return vals, count
 
 def process(vals, writer):
-    _command = vals[0]
+    _command = vals[0].upper()
     if _command=="PING":
         writer.write(resp_format_data( "PONG", "simplestr"))
     elif _command=="ECHO":
         resp = resp_format_data(vals[1], "bulkstr")
         writer.write(resp)
+
+
     elif _command=="SET":
         key = vals[1]
         value = vals[2]
-        KV_CACHE[key] = value
+
+        # opts = {}
+        # #check for expiry
+        # if len(vals) > 3:
+        #     i=3
+        #     while i < len(vals):
+        #         elem = vals[i]
+        #         if elem == "px":
+        #             i+=1
+        #             opts["px"] = vals[i]
+        #         i+=1
+
+        expiry = None
+        if len(vals) > 3 and vals[3].lower() =="px":
+            expiry = int(vals[4])
+
+        KV_CACHE[key] = {
+            "value": value,
+            "exp": datetime.now() + timedelta(milliseconds=expiry) if expiry else None,
+        }
         writer.write(resp_format_data("OK", "simplestr"))
+
+
     elif _command=="GET":
         key = vals[1]
-        value = KV_CACHE.get(key)
+        valueset = KV_CACHE.get(key)
+        value = None
+
+        if valueset:
+            exp = valueset.get("exp")
+            if not exp or exp >= datetime.now(): #TODO: remove KV from cache if expired to save memory
+                value = valueset.get("value")
+
         writer.write(resp_format_data(value, "bulkstr"))
+
+    else:
+        writer.write(resp_format_data(f"Invalid command: {_command}", "bulkstr"))
 
 async def handle_client(reader, writer):
     print("Client connected")
