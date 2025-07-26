@@ -133,7 +133,7 @@ def process(vals, writer):
         values = vals[2:]
 
         existing_list = KV_CACHE.get(key, [])
-        existing_list = values + existing_list
+        existing_list = values[::-1] + existing_list
 
         KV_CACHE[key] = existing_list
         writer.write(resp_format_data(len(existing_list), "int"))
