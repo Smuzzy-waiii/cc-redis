@@ -1,3 +1,4 @@
+import time
 from datetime import datetime, timedelta
 
 from app.datatypes.KeyVal import KeyVal
@@ -84,10 +85,38 @@ def process(vals, writer):
         popped = existing_list.lpop(amt_to_pop)
         KV_CACHE[key] = existing_list
 
-        retval = popped if amt_to_pop > 1 else popped[0]
         resp_type = "array" if popped and amt_to_pop > 1 else "bulkstr"
-        writer.write(resp_format_data(retval, resp_type))
+        writer.write(resp_format_data(popped, resp_type))
 
+    elif _command == "BLPOP":
+        key = vals[1]
+        exp = float(vals[2])
+
+        existing_list = KV_CACHE.get(key, RedisList())
+        popped = existing_list.lpop(1)
+        if popped:
+            KV_CACHE[key] = existing_list
+            writer.write(resp_format_data(popped, "bulkstr"))
+            return
+
+        id = existing_list.stand_in_queue()
+        exp_time = time.monotonic()+exp if exp!=0 else None
+        KV_CACHE[key] = existing_list
+        while True:
+            existing_list = KV_CACHE[key]
+            if exp_time and time.monotonic()<exp_time:
+                existing_list.exit_queue(id)
+                writer.write(resp_format_data(None, "bulkstr"))
+                return
+
+            popped = existing_list.lpop(1)
+            if popped:
+                if existing_list.top_of_queue(id):
+                    existing_list.clear_queue()
+                    KV_CACHE[key] = existing_list
+                    writer.write(resp_format_data(popped, "bulkstr"))
+                return
+                
     #LRANGE <key> <start_idx> <end_idx>
     elif _command=="LRANGE":
         if len(vals) < 4:

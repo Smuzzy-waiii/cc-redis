@@ -1,3 +1,5 @@
+import random
+
 from app.datatypes.Item import Item
 
 class RedisList(Item):
@@ -7,6 +9,20 @@ class RedisList(Item):
 
     def __len__(self):
         return len(self.value)
+
+    def stand_in_queue(self):
+        id = random.randint(0, 1_000_000)
+        self.blocking_queue.append(id)
+        return id
+
+    def top_of_queue(self, id):
+        return self.blocking_queue[0] == id
+
+    def exit_queue(self, id):
+        self.blocking_queue.remove(id)
+
+    def clear_queue(self):
+        self.blocking_queue = []
 
     def rpush(self, values):
         self.value.extend(values)
@@ -21,7 +37,7 @@ class RedisList(Item):
         amt_to_pop = min(amt_to_pop, len(self.value))
         popped = self.value[:amt_to_pop]
         self.value = self.value[amt_to_pop:]
-        return popped
+        return popped if amt_to_pop > 1 else popped[0]
 
     def lrange(self, start_idx, end_idx):
         values = self.value
