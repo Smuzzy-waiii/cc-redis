@@ -104,10 +104,10 @@ def process(vals, writer):
     #RPUSH <LIST_KEY> <ITEM> => [..., <ITEM>]
     elif _command=="RPUSH":
         key = vals[1]
-        value = vals[2]
+        values = vals[2:]
 
         existing_list = KV_CACHE.get(key, [])
-        existing_list.append(value)
+        existing_list.extend(values)
 
         KV_CACHE[key] = existing_list
         writer.write(resp_format_data(len(existing_list), "int"))
