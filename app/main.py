@@ -135,7 +135,9 @@ def process(vals, writer):
 
         values = KV_CACHE.get(key, [])
         if end_idx < 0:
-            end_idx = len(values)-end_idx
+            end_idx = len(values)+end_idx
+        if start_idx < 0:
+            start_idx = len(values)+start_idx
 
         if values == []:
             retval = []
