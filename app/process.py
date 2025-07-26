@@ -119,7 +119,7 @@ def process(vals, writer):
                     popped = existing_list.lpop(1)
                     existing_list.clear_queue()
                     KV_CACHE[key] = existing_list
-                    writer.write(resp_format_data(popped, "bulkstr"))
+                    writer.write(resp_format_data([key, popped], "array"))
                 return
 
     #LRANGE <key> <start_idx> <end_idx>
