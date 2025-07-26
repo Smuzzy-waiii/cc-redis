@@ -127,6 +127,17 @@ def process(vals, writer):
         KV_CACHE[key] = existing_list
         writer.write(resp_format_data(len(existing_list), "int"))
 
+    # LPUSH <LIST_KEY> <ITEM> => [<ITEM>, ...]
+    elif _command == "LPUSH":
+        key = vals[1]
+        values = vals[2:]
+
+        existing_list = KV_CACHE.get(key, [])
+        existing_list = values + existing_list
+
+        KV_CACHE[key] = existing_list
+        writer.write(resp_format_data(len(existing_list), "int"))
+
     #LRANGE <key> <start_idx> <end_idx>
     elif _command=="LRANGE":
         key = vals[1]
