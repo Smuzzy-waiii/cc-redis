@@ -104,19 +104,24 @@ def process(vals, writer):
         KV_CACHE[key] = existing_list
         while True:
             existing_list = KV_CACHE[key]
+            if not existing_list.still_in_queue(id):
+                writer.write(resp_format_data(None, "bulkstr"))
+                return
+
             if exp_time and time.monotonic()<exp_time:
                 existing_list.exit_queue(id)
                 writer.write(resp_format_data(None, "bulkstr"))
                 return
 
-            popped = existing_list.lpop(1)
-            if popped:
+            can_be_popped = len(existing_list)>0
+            if can_be_popped:
                 if existing_list.top_of_queue(id):
+                    popped = existing_list.lpop(1)
                     existing_list.clear_queue()
                     KV_CACHE[key] = existing_list
                     writer.write(resp_format_data(popped, "bulkstr"))
                 return
-                
+
     #LRANGE <key> <start_idx> <end_idx>
     elif _command=="LRANGE":
         if len(vals) < 4:

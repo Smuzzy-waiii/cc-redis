@@ -18,6 +18,9 @@ class RedisList(Item):
     def top_of_queue(self, id):
         return self.blocking_queue[0] == id
 
+    def still_in_queue(self, id):
+        return id in self.blocking_queue
+
     def exit_queue(self, id):
         self.blocking_queue.remove(id)
 

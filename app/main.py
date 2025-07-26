@@ -8,6 +8,7 @@ from app.process import process
 
 async def handle_client(reader, writer):
     devprint("Client connected")
+    loop = asyncio.get_running_loop()
 
     while True:
         raw_data = await reader.read(1024)
@@ -20,7 +21,7 @@ async def handle_client(reader, writer):
             return
         else:
             devprint("vals: ", vals)
-            process(vals, writer)
+            await loop.run_in_executor(None, process, vals, writer)
 
 
 async def main():
