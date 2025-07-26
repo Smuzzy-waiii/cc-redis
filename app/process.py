@@ -109,7 +109,7 @@ def process(vals, writer):
                 writer.write(resp_format_data(None, "bulkstr"))
                 return
 
-            if exp_time and time.monotonic()<exp_time:
+            if exp_time and time.monotonic()>exp_time:
                 existing_list.exit_queue(id)
                 writer.write(resp_format_data(None, "bulkstr"))
                 return
