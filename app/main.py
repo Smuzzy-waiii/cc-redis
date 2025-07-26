@@ -56,11 +56,13 @@ def process(vals, writer):
     _command = vals[0].upper()
     if _command=="PING":
         writer.write(resp_format_data( "PONG", "simplestr"))
+
+    # ECHO <str> => <str>
     elif _command=="ECHO":
         resp = resp_format_data(vals[1], "bulkstr")
         writer.write(resp)
 
-
+    # SET <key> <value> PX <expiry: ms> => OK
     elif _command=="SET":
         key = vals[1]
         value = vals[2]
@@ -86,7 +88,7 @@ def process(vals, writer):
         }
         writer.write(resp_format_data("OK", "simplestr"))
 
-
+    # GET <key> => <value> or nil
     elif _command=="GET":
         key = vals[1]
         valueset = KV_CACHE.get(key)
@@ -98,6 +100,18 @@ def process(vals, writer):
                 value = valueset.get("value")
 
         writer.write(resp_format_data(value, "bulkstr"))
+
+    #RPUSH <LIST_KEY> <ITEM> => [..., <ITEM>]
+    elif _command=="RPUSH":
+        key = vals[1]
+        value = vals[2]
+
+        existing_list = KV_CACHE.get(key, [])
+        existing_list.append(value)
+
+        KV_CACHE[key] = existing_list
+        writer.write(resp_format_data(len(existing_list), "int"))
+
 
     else:
         writer.write(resp_format_data(f"Invalid command: {_command}", "bulkstr"))
