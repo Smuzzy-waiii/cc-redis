@@ -3,6 +3,9 @@ class Item:
         self.value = value
         self.type = type
 
+    def get_type(self):
+        return self.type
+
     def to_dict(self):
         return {
             'value': self.value,

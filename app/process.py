@@ -1,6 +1,7 @@
 import time
 from datetime import datetime, timedelta
 
+from app.datatypes.Item import Item
 from app.datatypes.KeyVal import KeyVal
 from app.datatypes.List import RedisList
 from app.helpers import resp_format_data
@@ -16,6 +17,11 @@ def process(vals, writer):
     elif _command=="ECHO":
         resp = resp_format_data(vals[1], "bulkstr")
         writer.write(resp)
+
+    elif _command=="TYPE":
+        key = vals[1]
+        val = KV_CACHE.get(key, Item(None, "none"))
+        writer.write(resp_format_data(val.get_type(), "simplestr"))
 
     # SET <key> <value> PX <expiry: ms> => OK
     elif _command=="SET":
