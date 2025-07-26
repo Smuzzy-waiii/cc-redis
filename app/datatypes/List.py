@@ -8,7 +8,8 @@ class RedisList(Item):
         self.blocking_queue = []
 
     def __len__(self):
-        return len(self.value)
+        length = len(self.value)
+        return length
 
     def stand_in_queue(self):
         id = random.randint(0, 1_000_000)

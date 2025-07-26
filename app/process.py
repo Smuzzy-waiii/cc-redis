@@ -71,7 +71,8 @@ def process(vals, writer):
     elif _command == "LLEN":
         key = vals[1]
         existing_list = KV_CACHE.get(key, RedisList())
-        writer.write(resp_format_data(len(existing_list), "int"))
+        length = len(existing_list)
+        writer.write(resp_format_data(length, "int"))
 
     # LPOP <LIST_KEY> => popped elem
     elif _command == "LPOP":
