@@ -4,8 +4,6 @@ import sys
 from datetime import datetime, timedelta
 from shutil import Error
 
-from future.backports.datetime import datetime
-
 KV_CACHE = {}
 
 def resp_format_data(val, datatype) -> bytes :
