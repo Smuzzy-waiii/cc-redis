@@ -118,7 +118,6 @@ def process(vals, writer):
             if can_be_popped:
                 if existing_list.top_of_queue(id):
                     popped = existing_list.lpop(1)
-                    existing_list.clear_queue()
                     KV_CACHE[key] = existing_list
                     writer.write(resp_format_data([key, popped], "array"))
                 return
