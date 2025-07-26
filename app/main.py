@@ -144,6 +144,16 @@ def process(vals, writer):
         existing_list = KV_CACHE.get(key, [])
         writer.write(resp_format_data(len(existing_list), "int"))
 
+    # LLEN <LIST_KEY> => popped elem
+    elif _command == "LPOP":
+        key = vals[1]
+        existing_list = KV_CACHE.get(key, [])
+        if existing_list==[]:
+            writer.write(resp_format_data(None, "bulkstr"))
+        retval = existing_list.pop(0)
+        KV_CACHE[key] = existing_list
+        writer.write(resp_format_data(retval, "bulkstr"))
+
     #LRANGE <key> <start_idx> <end_idx>
     elif _command=="LRANGE":
         key = vals[1]
