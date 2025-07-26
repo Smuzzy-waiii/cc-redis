@@ -43,7 +43,7 @@ def parse_raw_data(raw_data: bytes):
     prefix = data_arr[0]
     if prefix[0]!="*":
         sys.exit("Non Array Requests not supported")
-    count = int(prefix[1])
+    count = int(prefix[1:])
 
     vals = []
     idx = 0
