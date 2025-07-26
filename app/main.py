@@ -1,3 +1,4 @@
+import asyncio
 import socket  # noqa: F401
 import sys
 from sys import prefix
@@ -36,23 +37,36 @@ def process_raw_data(raw_data: bytes):
             vals.append(val)
     return vals, count
 
-def main():
-    # You can use print statements as follows for debugging, they'll be visible when running tests.
-    print("Logs from your program will appear here!")
+async def handle_client(reader, writer):
+    print("Client connected")
 
-    # Uncomment this to pass the first stage
-
-    #
-    server_socket = socket.create_server(("localhost", 6379), reuse_port=True)
-    conn, _ = server_socket.accept() # wait for client
     while True:
-        raw_data = conn.recv(1024)
+        raw_data = await reader.read(1024)
         vals, count = process_raw_data(raw_data)
-        if vals is not None:
+
+        if vals is None:
+            await writer.drain()
+            writer.close()
+            await writer.wait_closed()
+            return
+        else:
             print("vals: ", vals)
             for val in vals:
                 if val == "PING":
-                    conn.sendall(b"+PONG\r\n")
+                    writer.write(b"+PONG\r\n")
+
+async def main():
+    # You can use print statements as follows for debugging, they'll be visible when running tests.
+    print("Logs from your program will appear here!")
+
+    server = await asyncio.start_server(
+        handle_client, 'localhost', 6379, reuse_port=True
+    )
+    addr = server.sockets[0].getsockname()
+    print(f'Serving on {addr}')
+
+    async with server:
+        await server.serve_forever()
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
