@@ -1,4 +1,5 @@
 import asyncio
+import os
 import socket  # noqa: F401
 import sys
 from datetime import datetime, timedelta
@@ -6,6 +7,11 @@ from shutil import Error
 from tokenize import endpats
 
 KV_CACHE = {}
+DEV_MODE = False
+
+def devprint(*args):
+    if DEV_MODE:
+        print(*args)
 
 def resp_format_data_raw(val, datatype) -> str :
     if datatype == 'int':
@@ -144,7 +150,7 @@ def process(vals, writer):
         writer.write(resp_format_data(f"Invalid command: {_command}", "bulkstr"))
 
 async def handle_client(reader, writer):
-    # print("Client connected")
+    devprint("Client connected")
 
     while True:
         raw_data = await reader.read(1024)
@@ -156,13 +162,18 @@ async def handle_client(reader, writer):
             await writer.wait_closed()
             return
         else:
-            print("vals: ", vals)
+            devprint("vals: ", vals)
             process(vals, writer)
 
 
 async def main():
     # You can use print statements as follows for debugging, they'll be visible when running tests.
     print("Logs from your program will appear here!")
+
+    if os.getenv("DEV_MODE"):
+        global DEV_MODE
+        DEV_MODE = True
+        print("Running in development mode")
 
     server = await asyncio.start_server(
         handle_client, 'localhost', 6379, reuse_port=True
