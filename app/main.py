@@ -138,6 +138,12 @@ def process(vals, writer):
         KV_CACHE[key] = existing_list
         writer.write(resp_format_data(len(existing_list), "int"))
 
+    # LLEN <LIST_KEY> => <length_of_list>
+    elif _command == "LLEN":
+        key = vals[1]
+        existing_list = KV_CACHE.get(key, [])
+        writer.write(resp_format_data(len(existing_list), "int"))
+
     #LRANGE <key> <start_idx> <end_idx>
     elif _command=="LRANGE":
         key = vals[1]
