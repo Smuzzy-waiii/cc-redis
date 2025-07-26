@@ -117,7 +117,7 @@ def process(vals, writer):
         writer.write(resp_format_data(f"Invalid command: {_command}", "bulkstr"))
 
 async def handle_client(reader, writer):
-    print("Client connected")
+    # print("Client connected")
 
     while True:
         raw_data = await reader.read(1024)
@@ -129,7 +129,7 @@ async def handle_client(reader, writer):
             await writer.wait_closed()
             return
         else:
-            print("vals: ", vals)
+            # print("vals: ", vals)
             process(vals, writer)
 
 
