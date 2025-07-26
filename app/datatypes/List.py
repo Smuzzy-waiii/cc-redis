@@ -3,7 +3,8 @@ import random
 from app.datatypes.Item import Item
 
 class RedisList(Item):
-    def __init__(self, value=[]):
+    def __init__(self, value=None):
+        value = value if value is not None else []
         super().__init__(value, "list")
         self.blocking_queue = []
 
