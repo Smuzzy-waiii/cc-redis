@@ -20,7 +20,7 @@ class Stream(Item):
         if id_to_add.seq_num == -1: #seq_num=*
             if last_id and last_id.milliseconds_time==id_to_add.milliseconds_time:
                 id_to_add.seq_num = last_id.seq_num + 1
-            elif id_to_add.milliseconds_time == "0":
+            elif id_to_add.milliseconds_time == 0:
                 id_to_add.seq_num = 1
             else:
                 id_to_add.seq_num = 0
