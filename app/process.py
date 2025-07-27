@@ -152,6 +152,8 @@ def process(vals, writer):
             kvs[vals[i]] = vals[i+1]
             i+=2
 
+        if entry_id == "*":
+            entry_id = "*-*"
         stream = KV_CACHE.get(key, Stream())
 
         try:

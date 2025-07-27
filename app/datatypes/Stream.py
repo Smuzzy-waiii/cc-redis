@@ -1,3 +1,5 @@
+import time
+
 from app.datatypes.StreamID import StreamID
 from app.datatypes.Item import Item
 from app.datatypes.StreamEntry import StreamEntry
@@ -10,6 +12,10 @@ class Stream(Item):
         #validate entry id
         id_to_add = StreamID.from_string(id)
         last_id = self.value[-1].id if len(self.value) > 0 else None
+
+        if id_to_add.milliseconds_time == -1:
+            # set milliseconds_time to current unix time in ms
+            id_to_add.milliseconds_time = int(time.time()*1000)
 
         if id_to_add.seq_num == -1: #seq_num=*
             if last_id and last_id.milliseconds_time==id_to_add.milliseconds_time:

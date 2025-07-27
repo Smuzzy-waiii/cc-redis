@@ -1,6 +1,6 @@
 class StreamID:
     def __init__(self, milliseconds_time, seq_num):
-        self.milliseconds_time = milliseconds_time
+        self.milliseconds_time = int(milliseconds_time) if milliseconds_time.isnumeric() else -1
         self.seq_num = int(seq_num) if seq_num.isnumeric() else -1
 
     def from_string(s):
