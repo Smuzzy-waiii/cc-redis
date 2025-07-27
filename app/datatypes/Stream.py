@@ -34,6 +34,16 @@ class Stream(Item):
         self.value.append(entry)
         return entry
 
+    def xrange(self, start: StreamID, end: StreamID):
+        result = []
+        for entry in self.value:
+            if entry.id <= end and entry.id >= start:
+                data = []
+                for k, v in entry.data.items():
+                    data.extend([k, v])
+                result.append([str(entry.id), data])
+        return result
+
 class StreamIDNotGreaterThanLastID(Exception):
     pass
 

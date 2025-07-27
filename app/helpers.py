@@ -18,8 +18,15 @@ def resp_format_data_raw(val, datatype) -> str :
     elif datatype == 'array':
         res = f"*{len(val)}\r\n"
         for v in val:
-            res += resp_format_data_raw(v, "bulkstr")
+            t = type(v)
+            if t==str:
+                res += resp_format_data_raw(v, "bulkstr")
+            elif t==int:
+                res += resp_format_data_raw(v, "int")
+            elif t==list:
+                res += resp_format_data_raw(v, "array")
         return res
+
     else:
         raise Exception(f"Unsupported datatype: {datatype}")
 

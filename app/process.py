@@ -5,6 +5,7 @@ from app.datatypes.Item import Item
 from app.datatypes.KeyVal import KeyVal
 from app.datatypes.List import RedisList
 from app.datatypes.Stream import Stream, StreamIDNotGreaterThanZero, StreamIDNotGreaterThanLastID
+from app.datatypes.StreamID import StreamID
 from app.helpers import resp_format_data
 
 KV_CACHE = {}
@@ -167,6 +168,22 @@ def process(vals, writer):
 
         KV_CACHE[key] = stream
         writer.write(resp_format_data(str(entry.id), "bulkstr"))
+
+    elif _command == "XRANGE":
+        key = vals[1]
+        startstr= vals[2]
+        endstr = vals[3]
+
+        if "-" not in startstr:
+            startstr=startstr+"-0"
+        if "-" not in endstr:
+            endstr=endstr+"-99999999999999999999"
+        start = StreamID.from_string(startstr)
+        end = StreamID.from_string(endstr)
+
+        stream = KV_CACHE.get(key, Stream())
+        res = stream.xrange(start, end)
+        writer.write(resp_format_data(res, "array"))
 
     else:
         writer.write(resp_format_data(f"Invalid command: {_command}", "bulkstr"))

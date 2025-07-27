@@ -19,3 +19,16 @@ class StreamID:
         if self.milliseconds_time == other.milliseconds_time:
             return self.seq_num > other.seq_num
         return False
+
+    def __lt__(self, other):
+        if self.milliseconds_time < other.milliseconds_time:
+            return True
+        if self.milliseconds_time == other.milliseconds_time:
+            return self.seq_num < other.seq_num
+        return False
+
+    def __ge__(self, other):
+        return self > other or self == other
+
+    def __le__(self, other):
+        return self < other or self == other
