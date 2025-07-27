@@ -9,14 +9,24 @@ class Stream(Item):
     def add_entry(self, id, kvs):
         #validate entry id
         id_to_add = StreamID.from_string(id)
+        last_id = self.value[-1].id if len(self.value) > 0 else None
+
+        if id_to_add.seq_num == -1: #seq_num=*
+            if last_id:
+                id_to_add.seq_num = last_id.seq_num + 1
+            elif id_to_add.milliseconds_time == "0":
+                id_to_add.seq_num = 1
+            else:
+                id_to_add.seq_num = 0
+
         if not (id_to_add > StreamID("0", "0")):
             raise StreamIDNotGreaterThanZero()
-
-        last_id = self.value[-1].id if len(self.value) > 0 else None
         if last_id and not (id_to_add > last_id):
             raise StreamIDNotGreaterThanLastID()
 
-        self.value.append(StreamEntry(id_to_add, kvs))
+        entry = StreamEntry(id_to_add, kvs)
+        self.value.append(entry)
+        return entry
 
 class StreamIDNotGreaterThanLastID(Exception):
     pass

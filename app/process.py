@@ -155,7 +155,7 @@ def process(vals, writer):
         stream = KV_CACHE.get(key, Stream())
 
         try:
-            stream.add_entry(entry_id, kvs)
+            entry = stream.add_entry(entry_id, kvs)
         except StreamIDNotGreaterThanLastID:
             writer.write(resp_format_data("ERR The ID specified in XADD is equal or smaller than the target stream top item", "simpleerror"))
             return
@@ -164,7 +164,7 @@ def process(vals, writer):
             return
 
         KV_CACHE[key] = stream
-        writer.write(resp_format_data(entry_id, "bulkstr"))
+        writer.write(resp_format_data(str(entry.id), "bulkstr"))
 
     else:
         writer.write(resp_format_data(f"Invalid command: {_command}", "bulkstr"))

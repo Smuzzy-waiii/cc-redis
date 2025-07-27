@@ -1,10 +1,10 @@
 class StreamID:
     def __init__(self, milliseconds_time, seq_num):
         self.milliseconds_time = milliseconds_time
-        self.seq_num = seq_num
+        self.seq_num = int(seq_num) if seq_num.isnumeric() else -1
 
-    def from_string(string):
-        milliseconds_time, seq_num = string.split('-')
+    def from_string(s):
+        milliseconds_time, seq_num = s.split('-')
         return StreamID(milliseconds_time, seq_num)
 
     def __str__(self):
