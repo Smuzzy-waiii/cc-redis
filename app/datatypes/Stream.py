@@ -10,7 +10,10 @@ class Stream(Item):
 
     def add_entry(self, id, kvs):
         #validate entry id
-        milliseconds_time, seq_num = id.split("-")
+        parts = id.split("-")
+        milliseconds_time = int(parts[0]) if parts[0].isnumeric() else parts[0]
+        seq_num = int(parts[1]) if parts[1].isnumeric() else parts[1]
+
         last_id = self.value[-1].id if len(self.value) > 0 else None
 
         if milliseconds_time == '*':
