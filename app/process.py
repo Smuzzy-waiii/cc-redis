@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from app.datatypes.Item import Item
 from app.datatypes.KeyVal import KeyVal
 from app.datatypes.List import RedisList
-from app.datatypes.Stream import Stream
+from app.datatypes.Stream import Stream, StreamIDNotGreaterThanZero, StreamIDNotGreaterThanLastID
 from app.helpers import resp_format_data
 
 KV_CACHE = {}
@@ -153,7 +153,16 @@ def process(vals, writer):
             i+=2
 
         stream = KV_CACHE.get(key, Stream())
-        stream.add_entry(entry_id, kvs)
+
+        try:
+            stream.add_entry(entry_id, kvs)
+        except StreamIDNotGreaterThanLastID:
+            writer.write(resp_format_data("ERR The ID specified in XADD is equal or smaller than the target stream top item", "simpleerror"))
+            return
+        except StreamIDNotGreaterThanZero:
+            writer.write(resp_format_data("ERR The ID specified in XADD must be greater than 0-0", "simpleerror"))
+            return
+
         KV_CACHE[key] = stream
         writer.write(resp_format_data(entry_id, "bulkstr"))
 

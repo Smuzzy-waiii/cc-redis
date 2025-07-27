@@ -1,3 +1,6 @@
+from app.datatypes.StreamID import StreamID
+
+
 class StreamEntry:
     def __init__(self, id, kvs=None):
         self.id = id

@@ -9,6 +9,8 @@ def resp_format_data_raw(val, datatype) -> str :
         return f":{val}\r\n"
     elif datatype == "simplestr":
         return f"+{val}\r\n"
+    elif datatype == "simpleerror":
+        return f"-{val}\r\n"
     elif datatype == 'bulkstr':
         if val is None:
             return "$-1\r\n"

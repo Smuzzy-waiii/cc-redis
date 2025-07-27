@@ -2,6 +2,7 @@ import asyncio
 import os
 import socket  # noqa: F401
 
+import app
 from app.helpers import devprint, DEV_MODE
 from app.parse import parse_raw_data
 from app.process import process
@@ -29,8 +30,7 @@ async def main():
     print("Logs from your program will appear here!")
 
     if os.getenv("DEV_MODE"):
-        global DEV_MODE
-        DEV_MODE = True
+        app.helpers.DEV_MODE = True
         print("Running in development mode")
 
     server = await asyncio.start_server(
