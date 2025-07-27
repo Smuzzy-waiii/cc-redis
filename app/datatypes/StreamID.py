@@ -34,7 +34,7 @@ class StreamID:
                 return True
             if other.seq_num == -1:
                 return False
-            return self.milliseconds_time > other.milliseconds_time
+            return self.seq_num > other.seq_num
 
         if self.milliseconds_time == -1:
             return True
