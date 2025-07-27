@@ -10,21 +10,22 @@ class Stream(Item):
 
     def add_entry(self, id, kvs):
         #validate entry id
-        id_to_add = StreamID.from_string(id)
+        milliseconds_time, seq_num = id.split("-")
         last_id = self.value[-1].id if len(self.value) > 0 else None
 
-        if id_to_add.milliseconds_time == -1:
+        if milliseconds_time == '*':
             # set milliseconds_time to current unix time in ms
-            id_to_add.milliseconds_time = int(time.time()*1000)
+            milliseconds_time = int(time.time()*1000)
 
-        if id_to_add.seq_num == -1: #seq_num=*
-            if last_id and last_id.milliseconds_time==id_to_add.milliseconds_time:
-                id_to_add.seq_num = last_id.seq_num + 1
-            elif id_to_add.milliseconds_time == 0:
-                id_to_add.seq_num = 1
+        if seq_num == '*':
+            if last_id and last_id.milliseconds_time==milliseconds_time:
+                seq_num = last_id.seq_num + 1
+            elif milliseconds_time == 0:
+                seq_num = 1
             else:
-                id_to_add.seq_num = 0
+                seq_num = 0
 
+        id_to_add = StreamID(milliseconds_time, seq_num)
         if not (id_to_add > StreamID(0, 0)):
             raise StreamIDNotGreaterThanZero()
         if last_id and not (id_to_add > last_id):
