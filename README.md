@@ -10,7 +10,7 @@ Redis commands supported:
 - [x]  Key-Value: `SET`, `GET`
 - [X]  List: `RPUSH`, `LPUSH`, `LRANGE`, `LLEN`, `LPOP`, `BLPOP`
 - [ ]  Stream:
-   - [ ] `XADD`
+   - [x] `XADD`
    - [ ] `XRANGE`
    - [ ] `XREAD`
 - [ ] Transactions:
