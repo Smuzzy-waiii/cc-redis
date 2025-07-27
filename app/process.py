@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from app.datatypes.Item import Item
 from app.datatypes.KeyVal import KeyVal
 from app.datatypes.List import RedisList
+from app.datatypes.Stream import Stream
 from app.helpers import resp_format_data
 
 KV_CACHE = {}
@@ -141,6 +142,20 @@ def process(vals, writer):
         existing_list = KV_CACHE.get(key, RedisList())
         retval = existing_list.lrange(start_idx, end_idx)
         writer.write(resp_format_data(retval, "array"))
+
+    elif _command=="XADD":
+        key = vals[1]
+        entry_id = vals[2]
+        kvs = {}
+        i = 3
+        while i < len(vals):
+            kvs[vals[i]] = vals[i+1]
+            i+=2
+
+        stream = KV_CACHE.get(key, Stream())
+        stream.add_entry(entry_id, kvs)
+        KV_CACHE[key] = stream
+        writer.write(resp_format_data(entry_id, "bulkstr"))
 
     else:
         writer.write(resp_format_data(f"Invalid command: {_command}", "bulkstr"))
