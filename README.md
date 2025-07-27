@@ -11,7 +11,7 @@ Redis commands supported:
 - [X]  List: `RPUSH`, `LPUSH`, `LRANGE`, `LLEN`, `LPOP`, `BLPOP`
 - [ ]  Stream:
    - [x] `XADD`
-   - [ ] `XRANGE`
+   - [x] `XRANGE`
    - [ ] `XREAD`
 - [ ] Transactions:
    - [ ] `INCR`
