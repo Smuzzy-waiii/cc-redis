@@ -25,7 +25,7 @@ class Stream(Item):
             else:
                 id_to_add.seq_num = 0
 
-        if not (id_to_add > StreamID("0", "0")):
+        if not (id_to_add > StreamID(0, 0)):
             raise StreamIDNotGreaterThanZero()
         if last_id and not (id_to_add > last_id):
             raise StreamIDNotGreaterThanLastID()
