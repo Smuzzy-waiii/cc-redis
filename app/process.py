@@ -174,6 +174,9 @@ def process(vals, writer):
         startstr= vals[2]
         endstr = vals[3]
 
+        if startstr == "-":
+            startstr = "0-0"
+
         if "-" not in startstr:
             startstr=startstr+"-0"
         if "-" not in endstr:
